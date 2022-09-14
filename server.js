@@ -7,8 +7,10 @@ import { Server } from "socket.io";
 import morgan from 'morgan';
 import handlebars from 'express-handlebars';
 import Contenedor from './src/models/contenedor.js';
-const productos = new Contenedor('./src/db/productos.json');
+//const productos = new Contenedor('./src/db/productos.json');
 const historial = new Contenedor('./src/db/historial.json');
+import { ContenedorSQL } from './src/container/ContenedorSQL.js';
+const productosDB = new ContenedorSQL('productos');
 
 //Solucion a __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -49,14 +51,20 @@ const server = httpServer.listen(PORT, ()=>{
 /******Web Socket******/
 //Productos
 io.on('connection', async (socket)=>{
-    console.log('Usuario Conectado');
-    const prods = await productos.getAll();
-    
-    socket.emit('productos', prods);
-    socket.on('new-prod', data =>{
-        productos.save(data);
-        io.sockets.emit('productos',prods);
-    });
+    try {
+        console.log('Usuario Conectado');
+        let prods;
+        prods = await productosDB.listarAll();
+        socket.emit('productos', prods);
+
+        socket.on('new-prod', async data =>{
+        productosDB.insertar(data);
+        prods = await productosDB.listarAll();
+            io.sockets.emit('productos',prods);
+        });
+    } catch (error) {
+        throw error;
+    }
 });
 
 //Chat
