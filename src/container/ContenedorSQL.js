@@ -1,9 +1,7 @@
 import knex from "knex";
-import { config } from "../utils/config.js";
-
 
 export class ContenedorSQL {
-    constructor(tableName){
+    constructor(config, tableName){
         this.knexCli = knex(config.db);
         this.tableName = tableName;
     }
@@ -51,4 +49,4 @@ export class ContenedorSQL {
     cerrarConexion(){
         this.knexCli.destroy()
     }
-}
+};

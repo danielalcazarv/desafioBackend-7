@@ -6,11 +6,10 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import morgan from 'morgan';
 import handlebars from 'express-handlebars';
-import Contenedor from './src/models/contenedor.js';
-//const productos = new Contenedor('./src/db/productos.json');
-const historial = new Contenedor('./src/db/historial.json');
 import { ContenedorSQL } from './src/container/ContenedorSQL.js';
-const productosDB = new ContenedorSQL('productos');
+import { config, config2 } from "./src/utils/config.js";
+const productosDB = new ContenedorSQL(config, 'productos');
+const historialDB = new ContenedorSQL(config2,'historial')
 
 //Solucion a __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -58,8 +57,8 @@ io.on('connection', async (socket)=>{
         socket.emit('productos', prods);
 
         socket.on('new-prod', async data =>{
-        productosDB.insertar(data);
-        prods = await productosDB.listarAll();
+            productosDB.insertar(data);
+            prods = await productosDB.listarAll();
             io.sockets.emit('productos',prods);
         });
     } catch (error) {
@@ -68,12 +67,19 @@ io.on('connection', async (socket)=>{
 });
 
 //Chat
+
 io.on('connection', async (socket)=>{
-    const chat = await historial.getAll();
-    
-    socket.emit('mensajes',chat);
-    socket.on('new-mensaje', data =>{
-        historial.save(data);
-        io.sockets.emit('mensajes', chat);
-    });
+    try {
+        let chat;
+        chat = await historialDB.listarAll();
+        socket.emit('mensajes',chat);
+
+        socket.on('new-mensaje', async data =>{
+            historialDB.insertar(data);
+            chat = await historialDB.listarAll();
+            io.sockets.emit('mensajes', chat);
+        });
+    } catch (error) {
+        throw error;
+    }
 });
