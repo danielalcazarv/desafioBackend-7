@@ -10,7 +10,7 @@ export class ContenedorSQL {
 
     async listarAll(){
         try {
-            return await this.knexCli.from(this.tableName).select('*');
+            return await this.knexCli.from(this.tableName).select('*').orderBy('id', 'asc');
         } catch (error) {
             throw error;
         }

@@ -10,7 +10,7 @@ knexCli.schema.dropTableIfExists('productos')
             table.string('nombre', 50).notNullable();
             table.string('descripcion', 200).notNullable();
             table.integer('codigo').notNullable().unsigned();
-            table.integer('precio').notNullable().unsigned();
+            table.float('precio').notNullable().unsigned();
             table.integer('stock').notNullable().unsigned();
             table.string('foto', 500).notNullable();
         })
